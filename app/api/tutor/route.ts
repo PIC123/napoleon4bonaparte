@@ -2,6 +2,25 @@ import Anthropic from "@anthropic-ai/sdk";
 import { buildSystemPrompt, formatContext, type LabContext } from "@/lib/tutor-prompt";
 
 export const runtime = "nodejs";
+// Streaming replies can take a while; give the Vercel function room.
+export const maxDuration = 60;
+
+const MAX_MESSAGE_CHARS = 4000;
+const RATE_LIMIT = { windowMs: 10 * 60 * 1000, max: 40 };
+const buckets = new Map<string, { count: number; reset: number }>();
+
+/** Best-effort per-IP limiter (per serverless instance). Enough to stop casual abuse of the key. */
+function rateLimited(req: Request): boolean {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
+  const now = Date.now();
+  const b = buckets.get(ip);
+  if (!b || b.reset < now) {
+    buckets.set(ip, { count: 1, reset: now + RATE_LIMIT.windowMs });
+    return false;
+  }
+  b.count += 1;
+  return b.count > RATE_LIMIT.max;
+}
 
 const MODEL = process.env.TUTOR_MODEL ?? "claude-opus-5";
 const EFFORT = (process.env.TUTOR_EFFORT ?? "medium") as "low" | "medium" | "high";
@@ -24,11 +43,6 @@ interface TutorRequest {
  * is fully usable without a key.
  */
 export async function POST(req: Request) {
-  const hasCreds = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
-  if (!hasCreds) {
-    return Response.json({ offline: true, reason: "ANTHROPIC_API_KEY is not set" }, { status: 503 });
-  }
-
   let body: TutorRequest;
   try {
     body = (await req.json()) as TutorRequest;
@@ -37,6 +51,17 @@ export async function POST(req: Request) {
   }
   if (!Array.isArray(body.messages) || body.messages.length === 0 || !body.context) {
     return Response.json({ error: "messages and context are required" }, { status: 400 });
+  }
+  if (body.messages.some((m) => typeof m.content === "string" && m.content.length > MAX_MESSAGE_CHARS)) {
+    return Response.json({ error: "Message too long" }, { status: 413 });
+  }
+  if (rateLimited(req)) {
+    return Response.json({ error: "Too many requests. Take a breath and try again in a few minutes." }, { status: 429 });
+  }
+
+  const hasCreds = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
+  if (!hasCreds) {
+    return Response.json({ offline: true, reason: "ANTHROPIC_API_KEY is not set" }, { status: 503 });
   }
 
   // Keep the conversation bounded; the tutor doesn't need ancient history.

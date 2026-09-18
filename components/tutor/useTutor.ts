@@ -172,6 +172,10 @@ export function useTutor() {
           await streamScripted(offlineAnswer(stage.id, trimmed), append, setStatus);
           return;
         }
+        if (res.status === 429) {
+          append("You've asked me a lot in a short time. Give it a few minutes, then come back. The science drawer is always open in the meantime.");
+          return;
+        }
         if (!res.ok || !res.body) {
           append("Hmm, I couldn't reach my notes just now. Try again in a moment.");
           return;

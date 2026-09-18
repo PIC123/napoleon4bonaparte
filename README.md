@@ -22,6 +22,26 @@ Open http://localhost:3000 and press **Enter the lab**.
 
 Without an API key the lab is still fully playable; Pip switches to an offline mode that answers from the stage's science notes.
 
+## Deploy on Vercel
+
+1. Import the repository in Vercel. Next.js is auto-detected; no build settings to change.
+2. Add environment variables (Project → Settings → Environment Variables):
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `ANTHROPIC_API_KEY` | yes | Powers Pip, the tutor. Without it the app deploys fine but Pip runs in offline mode. |
+| `TUTOR_MODEL` | no | Defaults to `claude-opus-5`. |
+| `TUTOR_EFFORT` | no | `low`, `medium` (default), or `high`. Lower is faster and cheaper. |
+
+3. Deploy. The tutor route (`/api/tutor`) streams over the Node runtime with a 60 s function timeout and a light per-IP rate limit (40 requests per 10 minutes) so the key isn't trivially abusable from a public URL.
+
+### Smoke test after deploying
+
+- Open `/lab`, pick a style, and confirm the 3D bench renders and orbits.
+- In the pantry, add baking powder to the pastry list and press **Check my lists**; the feedback should nudge you about leavening without naming the fix.
+- Ask Pip "Why does the cream need to boil?" The badge next to Pip's name should read **tutor** (not **offline**) and the reply should stream in.
+- Laminate to a few hundred layers, bake at ~210 °C with docking and a weighted tray, and confirm the oven scene shows an even golden sheet.
+
 ## Project layout
 
 ```
