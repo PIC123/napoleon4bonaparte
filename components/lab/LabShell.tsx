@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useShallow } from "zustand/react/shallow";
-import { Check, ChevronLeft, ChevronRight, Home, Maximize2, Minimize2, MousePointer2, RotateCcw } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Home, LogOut, Maximize2, Minimize2, MousePointer2, RotateCcw } from "lucide-react";
 import { useLab } from "@/lib/store";
 import { STAGES } from "@/lib/curriculum";
 import { cn } from "@/lib/utils";
@@ -51,7 +52,13 @@ export function LabShell() {
     })),
   );
   const stage = STAGES[stageIndex];
+  const router = useRouter();
   const hydrated = useHydrated();
+  const signOut = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.replace("/login");
+    router.refresh();
+  };
   const [panelTall, setPanelTall] = useState(false);
 
   useEffect(() => {
@@ -131,6 +138,9 @@ export function LabShell() {
           <Link href="/" className="text-ink-3 hover:text-ink" aria-label="Home">
             <Home className="size-4" />
           </Link>
+          <Button variant="ghost" size="sm" onClick={signOut} title="Sign out">
+            <LogOut /> Sign out
+          </Button>
         </div>
       </header>
 

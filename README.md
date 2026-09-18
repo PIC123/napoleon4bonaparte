@@ -32,11 +32,13 @@ Without an API key the lab is still fully playable; Pip switches to an offline m
 | `ANTHROPIC_API_KEY` | yes | Powers Pip, the tutor. Without it the app deploys fine but Pip runs in offline mode. |
 | `TUTOR_MODEL` | no | Defaults to `claude-opus-5`. |
 | `TUTOR_EFFORT` | no | `low`, `medium` (default), or `high`. Lower is faster and cheaper. |
+| `LAB_PASSWORD` | recommended | Shared invite password. When set, `/lab` and `/api/tutor` require signing in at `/login`; the landing page stays public. Sessions last 30 days and are invalidated when the password changes. |
 
 3. Deploy. The tutor route (`/api/tutor`) streams over the Node runtime with a 60 s function timeout and a light per-IP rate limit (40 requests per 10 minutes) so the key isn't trivially abusable from a public URL.
 
 ### Smoke test after deploying
 
+- Visit `/lab` in a private window. You should be redirected to `/login`; a wrong password should be refused and the right one should land you on the bench.
 - Open `/lab`, pick a style, and confirm the 3D bench renders and orbits.
 - In the pantry, add baking powder to the pastry list and press **Check my lists**; the feedback should nudge you about leavening without naming the fix.
 - Ask Pip "Why does the cream need to boil?" The badge next to Pip's name should read **tutor** (not **offline**) and the reply should stream in.
