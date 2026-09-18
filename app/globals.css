@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+/*
+  Napoleon Lab design tokens.
+  Warm pastry-kitchen palette: cream paper, toasted caramel, butter yellow,
+  sage for success, rose for caution. Everything is defined once here and
+  exposed to Tailwind through @theme so utilities like bg-cream / text-ink work.
+*/
+:root {
+  --cream: #fbf7f0;
+  --cream-2: #f4ede1;
+  --paper: #ffffff;
+  --ink: #2a2420;
+  --ink-2: #5b524b;
+  --ink-3: #8c8279;
+  --line: #e7dfd2;
+  --caramel: #c8873a;
+  --caramel-2: #a86a24;
+  --butter: #f2c14e;
+  --butter-2: #fbe7a6;
+  --sage: #5f8f6b;
+  --sage-2: #dcebdf;
+  --rose: #c95f5f;
+  --rose-2: #f6dede;
+  --sky: #5b8bb3;
+  --sky-2: #dfeaf4;
+  --shadow: 32 24 16;
+}
+
+@theme inline {
+  --color-cream: var(--cream);
+  --color-cream-2: var(--cream-2);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-caramel: var(--caramel);
+  --color-caramel-2: var(--caramel-2);
+  --color-butter: var(--butter);
+  --color-butter-2: var(--butter-2);
+  --color-sage: var(--sage);
+  --color-sage-2: var(--sage-2);
+  --color-rose: var(--rose);
+  --color-rose-2: var(--rose-2);
+  --color-sky: var(--sky);
+  --color-sky-2: var(--sky-2);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --shadow-soft: 0 1px 2px rgb(var(--shadow) / 0.04), 0 8px 24px -12px rgb(var(--shadow) / 0.18);
+  --shadow-lift: 0 2px 4px rgb(var(--shadow) / 0.05), 0 18px 40px -16px rgb(var(--shadow) / 0.28);
+  --radius-xl2: 1.25rem;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle paper texture so large cream surfaces don't feel flat */
+.paper-grain {
+  background-image:
+    radial-gradient(rgb(42 36 32 / 0.035) 1px, transparent 1px),
+    radial-gradient(rgb(42 36 32 / 0.02) 1px, transparent 1px);
+  background-size: 22px 22px, 34px 34px;
+  background-position: 0 0, 11px 17px;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 72, "SOFT" 60;
+}
+
+/* Thin, quiet scrollbars inside panels */
+.nice-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.nice-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.nice-scroll::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+}
+
+/* Custom range input matching the palette */
+input[type="range"].lab-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--caramel) 0%,
+    var(--caramel) var(--pct, 0%),
+    var(--line) var(--pct, 0%),
+    var(--line) 100%
+  );
+  outline: none;
+}
+input[type="range"].lab-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 2px solid var(--caramel);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.15);
+  cursor: pointer;
+}
+input[type="range"].lab-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 2px solid var(--caramel);
+  cursor: pointer;
+}
+
+@keyframes blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.08); }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes talk {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+@keyframes think {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-2px); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.avatar-eye { transform-origin: center; animation: blink 4.5s infinite; }
+.avatar-bob { animation: bob 3.2s ease-in-out infinite; }
+.avatar-mouth-talk { transform-origin: center; animation: talk 0.28s ease-in-out infinite; }
+.avatar-dot { animation: think 1.2s ease-in-out infinite; }
+.avatar-dot:nth-child(2) { animation-delay: 0.2s; }
+.avatar-dot:nth-child(3) { animation-delay: 0.4s; }
