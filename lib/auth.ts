@@ -13,7 +13,7 @@ export const AUTH_COOKIE = "napoleon_lab_session";
 export const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 export function gateEnabled(): boolean {
-  return Boolean(process.env.LAB_PASSWORD);
+  return Boolean((process.env.LAB_PASSWORD ?? "").trim());
 }
 
 async function hmac(key: string, message: string): Promise<string> {
@@ -32,7 +32,7 @@ async function hmac(key: string, message: string): Promise<string> {
 }
 
 export async function sessionToken(): Promise<string> {
-  return hmac(process.env.LAB_PASSWORD ?? "", "napoleon-lab-session-v1");
+  return hmac((process.env.LAB_PASSWORD ?? "").trim(), "napoleon-lab-session-v1");
 }
 
 /** Constant-time string comparison so timing doesn't leak the password. */
@@ -47,7 +47,9 @@ export function safeEqual(a: string, b: string): boolean {
 }
 
 export async function passwordMatches(candidate: string): Promise<boolean> {
-  const expected = process.env.LAB_PASSWORD ?? "";
+  // Trim both sides: values pasted into env settings often carry a stray newline.
+  const expected = (process.env.LAB_PASSWORD ?? "").trim();
+  candidate = candidate.trim();
   if (!expected) return false;
   // Compare HMACs rather than raw strings so lengths don't leak either.
   const [a, b] = await Promise.all([hmac("napoleon-lab-compare", candidate), hmac("napoleon-lab-compare", expected)]);

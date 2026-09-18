@@ -9,9 +9,13 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; reason?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, reason } = await searchParams;
+  const notice =
+    reason === "session"
+      ? "Your previous session is no longer valid (the password may have been changed). Please sign in again."
+      : null;
   // Only allow same-site relative redirects.
   const target = next && next.startsWith("/") && !next.startsWith("//") ? next : "/lab";
 
@@ -33,7 +37,7 @@ export default async function LoginPage({
             This lab is open to invited students. Enter the shared password to come in.
           </p>
           <div className="mt-6">
-            <LoginForm next={target} />
+            <LoginForm next={target} notice={notice} />
           </div>
           <p className="mt-5 text-xs text-ink-3">Don&apos;t have the password? Ask whoever invited you.</p>
         </div>

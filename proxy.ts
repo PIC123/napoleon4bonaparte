@@ -8,7 +8,8 @@ import { AUTH_COOKIE, gateEnabled, isValidSession } from "@/lib/auth";
 export async function proxy(request: NextRequest) {
   if (!gateEnabled()) return NextResponse.next();
 
-  const ok = await isValidSession(request.cookies.get(AUTH_COOKIE)?.value);
+  const cookie = request.cookies.get(AUTH_COOKIE)?.value;
+  const ok = await isValidSession(cookie);
   if (ok) return NextResponse.next();
 
   const { pathname, search } = request.nextUrl;
@@ -17,6 +18,8 @@ export async function proxy(request: NextRequest) {
   }
   const login = new URL("/login", request.url);
   login.searchParams.set("next", pathname + search);
+  // A cookie that exists but doesn't verify means the password was rotated (or tampered).
+  if (cookie) login.searchParams.set("reason", "session");
   return NextResponse.redirect(login);
 }
 
